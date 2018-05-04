@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework_bulk import BulkListSerializer, BulkSerializerMixin
 from products.models import Product, ProductDetail
 
 
@@ -11,7 +12,7 @@ class DetailSerializer(serializers.ModelSerializer):
         )
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductSerializer(BulkSerializerMixin, serializers.ModelSerializer):
     detail = DetailSerializer(required=False)
 
     class Meta:
@@ -20,11 +21,13 @@ class ProductSerializer(serializers.ModelSerializer):
             'id', 'is_active', 'type', 'name', 'description', 'is_variation', 'brand_id', 'code', 'family',
             'is_complement', 'is_delete', 'detail',
         )
+        list_serializer_class = BulkListSerializer
 
     def create(self, validated_data):
-        detail_data = validated_data.pop('detail')
+        detail_data = validated_data.pop('detail') if 'detail' in validated_data else None
         product = Product.objects.create(**validated_data)
-        ProductDetail.objects.create(product=product, **detail_data)
+        if detail_data is not None:
+            ProductDetail.objects.create(product=product, **detail_data)
         return product
 
     def update(self, instance, validated_data):

@@ -1,12 +1,10 @@
 from products.models import Product
-from products.serializers import ProductSerializer, DetailSerializer
+from products.serializers import ProductSerializer
 from rest_framework import generics
-from rest_framework.response import Response
-from rest_framework.reverse import reverse
-from rest_framework import status
+from rest_framework_bulk import ListCreateBulkUpdateAPIView
 
 
-class ProductList(generics.ListCreateAPIView):
+class ProductList(ListCreateBulkUpdateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     name = 'product-list'
